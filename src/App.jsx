@@ -2,8 +2,19 @@ import { useState, useEffect } from 'react';
 import './App.css';
 
 function App() {
-  const [entries, setEntries] = useState([]);
+  // --- NAPI LISTA MENTÉSE ÉS BETÖLTÉSE ---
+  const [entries, setEntries] = useState(() => {
+    const savedEntries = localStorage.getItem('dailyEntries');
+    return savedEntries ? JSON.parse(savedEntries) : [];
+  });
 
+  // Minden alkalommal, amikor az 'entries' változik, elmentjük a localStorage-be
+  useEffect(() => {
+    localStorage.setItem('dailyEntries', JSON.stringify(entries));
+  }, [entries]);
+
+
+  // --- KEDVENCEK MENTÉSE ÉS BETÖLTÉSE ---
   const [savedFoods, setSavedFoods] = useState(() => {
     const saved = localStorage.getItem('savedFoods');
     return saved ? JSON.parse(saved) : [
@@ -15,6 +26,8 @@ function App() {
     localStorage.setItem('savedFoods', JSON.stringify(savedFoods));
   }, [savedFoods]);
 
+
+  // --- ŰRLAP KEZELÉSE ---
   const [form, setForm] = useState({
     time: '',
     name: '',
@@ -84,10 +97,11 @@ function App() {
 
   const handleClearDaily = () => {
     if(window.confirm("Biztosan törlöd a mai listát? Tiszta lappal indulsz!")) {
-      setEntries([]);
+      setEntries([]); // Ez automatikusan kiüríti a localStorage-t is a useEffect miatt!
     }
   };
 
+  // --- MATEMATIKA ---
   const totals = entries.reduce(
     (acc, curr) => ({
       calories: acc.calories + curr.calories,
